@@ -7,6 +7,7 @@ import pandas as pd
 import pymc3 as pm
 
 from myfuncs.plots.scatter import scatter
+from myfuncs.stats.bayescorr import bayesian_correlation
 
 
 def lm(
@@ -14,6 +15,8 @@ def lm(
     y,
     inferencedata=None,
     hdi_prob=0.95,
+    stats_annotation=True,
+    run_correlation=True,
     ax=None,
     bandalpha=0.6,
     scatter_kws={},
@@ -61,22 +64,22 @@ def lm(
         df = pd.DataFrame(dict(x=x, y=y))
         with pm.Model() as glm:
             pm.GLM.from_formula("y ~ x", data=df)
-            inferencedata = pm.sample(return_inferencedata=True, **sample_kwargs)
+            idata_glm = pm.sample(return_inferencedata=True, **sample_kwargs)
 
-    summary = az.summary(inferencedata, hdi_prob=hdi_prob)
+    summary_glm = az.summary(idata_glm, hdi_prob=hdi_prob)
 
     # Plot MAP regression line
     if xrange is None:
         xs = np.linspace(np.min(x), np.max(x), 100)
     else:
         xs = np.linspace(*xrange, 100)
-    intercept = summary.loc["Intercept", "mean"]
-    beta = summary.loc["x", "mean"]
+    intercept = summary_glm.loc["Intercept", "mean"]
+    beta = summary_glm.loc["x", "mean"]
     ax.plot(xs, intercept + beta * xs, color=line_color, zorder=0, **kwargs)
 
     # Plot posterior predictive credible region band
-    intercept_samples = inferencedata.posterior["Intercept"].data.ravel()
-    beta_samples = inferencedata.posterior["x"].data.ravel()
+    intercept_samples = idata_glm.posterior["Intercept"].data.ravel()
+    beta_samples = idata_glm.posterior["x"].data.ravel()
     ypred = intercept_samples + beta_samples * xs[:, None]
     ypred_lower = np.quantile(ypred, (1 - hdi_prob) / 2, axis=1)
     ypred_upper = np.quantile(ypred, 1 - (1 - hdi_prob) / 2, axis=1)
@@ -90,4 +93,45 @@ def lm(
         linewidth=0,
     )
 
-    return ax, inferencedata, summary
+    # Bayesian correlation analysis
+    if run_correlation:
+        idata_corr = bayesian_correlation(x, y, sample_kwargs=sample_kwargs)
+        summary_corr = az.summary(idata_corr, hdi_prob=hdi_prob)
+
+    # Add stats annotation
+    if stats_annotation:
+        # Determine HDI column names in az.summary, based on hdi_prob
+        if ((100 * hdi_prob) % 2) == 0:
+            digits = 0
+        else:
+            digits = 1
+        hdi_lower = f"hdi_{100 * (1 - hdi_prob) / 2:.{digits}f}%"
+        hdi_upper = f"hdi_{100 * (1 - (1 - hdi_prob) / 2):.{digits}f}%"
+
+        stat_str = (
+            f"Intercept = {summary_glm.loc['Intercept', 'mean']:.2f} [{summary_glm.loc['Intercept', hdi_lower]:.2f}, {summary_glm.loc['Intercept', hdi_upper]:.2f}]"
+            + "\n"
+            + f"Slope = {summary_glm.loc['x', 'mean']:.2f} [{summary_glm.loc['x', hdi_lower]:.2f}, {summary_glm.loc['x', hdi_upper]:.2f}]"
+        )
+
+        if run_correlation:
+            stat_str_corr = (
+                f"r = {summary_corr.loc['r', 'mean']:.2f} [{summary_corr.loc['r', hdi_lower]:.2f}, {summary_corr.loc['r', hdi_upper]:.2f}]"
+                + "\n"
+            )
+            stat_str = stat_str_corr + stat_str
+
+        ax.annotate(
+            stat_str,
+            [1, 0.05],
+            xycoords="axes fraction",
+            ma="right",
+            ha="right",
+            va="bottom",
+            fontsize=4,
+        )
+
+    if run_correlation:
+        return ax, idata_glm, idata_corr
+    else:
+        return ax, idata_glm
