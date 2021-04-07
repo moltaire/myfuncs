@@ -5,7 +5,7 @@ import numpy as np
 def model_recovery(
     mpp,
     xp,
-    model_labels,
+    model_labels=None,
     ax=None,
     cmap="viridis",
     fontcolor_threshold=0.7,
@@ -15,7 +15,7 @@ def model_recovery(
     fontsize_inset=3,
     round_main_values=2,
     round_inset_values=2,
-    inset_aspect=0.75,
+    inset_aspect=1.0,
 ):
     """Plots a confusion matrix of model probabilities and a smaller one of exceedance probabilities. This plot is adapted from Findling et al. (Nature Human Behaviour, 2020).
 
@@ -39,6 +39,9 @@ def model_recovery(
     """
     if ax is None:
         ax = plt.gca()
+
+    if model_labels is None:
+        model_labels = [f"Model {m}" for m in range(mpp.shape[0])]
 
     # Plot heatmap
     ax.matshow(mpp, cmap=cmap, vmin=0, vmax=1)

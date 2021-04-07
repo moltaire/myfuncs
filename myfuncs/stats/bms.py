@@ -1,9 +1,10 @@
+import arviz as az
 import numpy as np
 import pymc3 as pm
 import theano.tensor as tt
 
 
-def bms(L, **sample_kwargs):
+def bms(L, hdi_prob=0.95, **sample_kwargs):
     """This function computes the exceedance probabilities (xp)
     and expected relative frequencies (r) from an array of log-evidences.
 
@@ -42,18 +43,25 @@ def bms(L, **sample_kwargs):
         ll = pm.DensityDist("ll", logp=lookup_L, observed=dict(L=L, N=N))
 
         # Sample
-        trace = pm.sample(**sample_kwargs)
+        inferencedata = pm.sample(return_inferencedata=True, **sample_kwargs)
 
     # Build results
     result = {}
-    result["summary"] = pm.summary(trace, var_names=["alpha", "r"])
+    result["summary"] = az.summary(
+        inferencedata, hdi_prob=hdi_prob, var_names=["alpha", "r"]
+    )
     result["xp"] = np.array(
         [
-            np.mean(trace.get_values("r")[:, k] == trace.get_values("r").max(axis=1))
+            np.mean(
+                inferencedata.posterior["r"].data[:, :, k]
+                == inferencedata.posterior["r"].data.max(axis=-1)
+            )
             for k in range(K)
         ]
     )
-    r_unscaled = np.array([np.mean(trace.get_values("r")[:, k]) for k in range(K)])
+    r_unscaled = np.array(
+        [np.mean(inferencedata.posterior["r"].data[:, :, k]) for k in range(K)]
+    )
     result["r"] = r_unscaled / r_unscaled.sum()
 
     return result
