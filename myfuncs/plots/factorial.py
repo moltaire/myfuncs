@@ -17,7 +17,8 @@ def factorial_heatmap(
     xlabel_rotation=0,
     pad_label_bar=0.2,
     pad_per_factor=1.5,
-    pad_colorbar=0.05,
+    cb_pad=0.04,
+    cb_fraction=0.046,
 ):
     """Make a factorial heatmap.
 
@@ -141,7 +142,7 @@ def factorial_heatmap(
             )
 
     # colorbar legend
-    cb = plt.colorbar(im, pad=len(row_factors) * pad_colorbar)
+    cb = plt.colorbar(im, pad=cb_pad, fraction=cb_fraction)
     cb.ax.set_title(value_var)
     cb.outline.set_linewidth(0.75)
 
