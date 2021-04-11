@@ -1,10 +1,12 @@
 #!/usr/bin/python
 """
-This script contains plot utilities
+This script contains some utility functions
 """
 
 import string
 from itertools import cycle
+from os import mkdir
+from os.path import exists
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -249,3 +251,11 @@ def hTextLine(
         **kwargs,
     )
     return ax
+
+
+def mkdir_if_needed(path, verbose=True):
+    if not exists(path):
+        mkdir(path)
+    else:
+        if verbose:
+            print(f"'{path}' already exists.")
