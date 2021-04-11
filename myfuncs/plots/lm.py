@@ -13,7 +13,6 @@ from myfuncs.stats.bayescorr import bayesian_correlation
 def lm(
     x,
     y,
-    inferencedata=None,
     hdi_prob=0.95,
     stats_annotation=True,
     run_correlation=True,
@@ -31,7 +30,6 @@ def lm(
     Args:
         x (array like): x values
         y (array like): y values
-        trace (pymc3.MultiTrace, optional): GLM trace from PyMC3.
         ax (matplotlib.axis, optional): Axis to plot on. Defaults to current axis.
         bandalpha (float, optional): Opacity level of confidence band.
         scatter_kws (dict, optional): Dictionary of keyword arguments passed onto `scatter`.
@@ -40,8 +38,8 @@ def lm(
     Returns:
         tuple
             matplotlib.axis: Axis with the linear model plot.
-            arviz.InferenceData
-            pandas.DataFrame: The linear model pymc3.summary
+            arviz.InferenceData: GLM
+            arviz.InferenceData: Correlation, optional, if `run_correlation`
     """
     if ax is None:
         ax = plt.gca()
@@ -60,11 +58,10 @@ def lm(
     ax = scatter(x, y, color=scatter_color, ax=ax, **scatter_kws)
 
     # Run GLM in PyMC3
-    if inferencedata is None:
-        df = pd.DataFrame(dict(x=x, y=y))
-        with pm.Model() as glm:
-            pm.GLM.from_formula("y ~ x", data=df)
-            idata_glm = pm.sample(return_inferencedata=True, **sample_kwargs)
+    df = pd.DataFrame(dict(x=x, y=y))
+    with pm.Model() as glm:
+        pm.GLM.from_formula("y ~ x", data=df)
+        idata_glm = pm.sample(return_inferencedata=True, **sample_kwargs)
 
     summary_glm = az.summary(idata_glm, hdi_prob=hdi_prob)
 

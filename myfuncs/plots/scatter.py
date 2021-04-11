@@ -42,7 +42,6 @@ def scatter(
         markersize=size,
         markerfacecolor=colorConverter.to_rgba(color, alpha=facealpha),
         markeredgecolor="none",
-        clip_on=False,
         **kwargs
     )
     scatterArtists[0].set_markeredgecolor(
