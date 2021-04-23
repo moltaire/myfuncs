@@ -218,8 +218,17 @@ def break_after_nth_tick(ax, n, axis="x", occHeight=None, occWidth=None, where=0
     return ax
 
 
-def hTextLine(
-    text, x0, x1, y, ax=None, linewidth=0.5, lineTextGap=0.1, fontsize=5, **kwargs
+def horizontal_text_line(
+    text,
+    x0,
+    x1,
+    y,
+    ax=None,
+    linewidth=0.5,
+    lineTextGap=0.1,
+    fontsize=5,
+    line_kwargs={},
+    text_kwargs={},
 ):
     """Add a horizontal line and some text. Good for p-values and similar stuff.
 
@@ -240,7 +249,7 @@ def hTextLine(
     if ax is None:
         ax = plt.gca()
 
-    ax.hlines(y, x0, x1, linewidth=linewidth, clip_on=False)
+    ax.hlines(y, x0, x1, linewidth=linewidth, clip_on=False, **line_kwargs)
     ax.text(
         x=(x0 + x1) / 2,
         y=y + lineTextGap,
@@ -248,7 +257,7 @@ def hTextLine(
         ha="center",
         va="bottom",
         fontsize=fontsize,
-        **kwargs,
+        **text_kwargs,
     )
     return ax
 
