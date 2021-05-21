@@ -224,7 +224,7 @@ def horizontal_text_line(
     x1,
     y,
     ax=None,
-    linewidth=0.5,
+    linewidth=0.75,
     lineTextGap=0.1,
     fontsize=5,
     line_kwargs={},
@@ -249,7 +249,9 @@ def horizontal_text_line(
     if ax is None:
         ax = plt.gca()
 
-    ax.hlines(y, x0, x1, linewidth=linewidth, clip_on=False, **line_kwargs)
+    ax.hlines(
+        y, x0, x1, linewidth=linewidth, color="black", clip_on=False, **line_kwargs
+    )
     ax.text(
         x=(x0 + x1) / 2,
         y=y + lineTextGap,
