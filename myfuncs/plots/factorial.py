@@ -19,6 +19,7 @@ def factorial_heatmap(
     fontcolor_abovethresh="black",
     cmap="viridis_r",
     norm=None,
+    add_colorbar=True,
     ax=None,
     ylabel_rotation=0,
     xlabel_rotation=0,
@@ -166,8 +167,9 @@ def factorial_heatmap(
             )
 
     # colorbar legend
-    cb = plt.colorbar(im, pad=cb_pad, fraction=cb_fraction)
-    cb.ax.set_title(value_var)
-    cb.outline.set_linewidth(0.75)
+    if add_colorbar:
+        cb = plt.colorbar(im, pad=cb_pad, fraction=cb_fraction)
+        cb.ax.set_title(value_var)
+        cb.outline.set_linewidth(0.75)
 
     return ax
