@@ -11,7 +11,15 @@ def factorial_heatmap(
     value_var,
     factor_labels={},
     level_labels={},
+    print_values=False,
+    round_to=2,
+    fontsize=4,
+    fontcolor_threshold=0.5,
+    fontcolor_belowthresh="white",
+    fontcolor_abovethresh="black",
     cmap="viridis_r",
+    norm=None,
+    add_colorbar=True,
     ax=None,
     ylabel_rotation=0,
     xlabel_rotation=0,
@@ -67,7 +75,24 @@ def factorial_heatmap(
     values = df_sorted[value_var].values.reshape(n_row, n_col)
 
     # Make the heatmap
-    im = plt.imshow(values, cmap=cmap)
+    im = plt.imshow(values, cmap=cmap, norm=norm)
+
+    # Optionally print values
+    if print_values:
+        for (i, j), z in np.ndenumerate(values):
+            if z < fontcolor_threshold:
+                color = fontcolor_belowthresh
+            else:
+                color = fontcolor_abovethresh
+            ax.text(
+                j,
+                i,
+                "{0:0.{prec}f}".format(z, prec=round_to),
+                ha="center",
+                va="center",
+                color=color,
+                fontsize=fontsize,
+            )
 
     # x_labels = levels from last col_factor
     ax.set_xlabel(factor_labels[col_factors[-1]])
@@ -142,8 +167,9 @@ def factorial_heatmap(
             )
 
     # colorbar legend
-    cb = plt.colorbar(im, pad=cb_pad, fraction=cb_fraction)
-    cb.ax.set_title(value_var)
-    cb.outline.set_linewidth(0.75)
+    if add_colorbar:
+        cb = plt.colorbar(im, pad=cb_pad, fraction=cb_fraction)
+        cb.ax.set_title(value_var)
+        cb.outline.set_linewidth(0.75)
 
     return ax
