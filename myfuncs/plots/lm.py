@@ -23,6 +23,7 @@ def lm(
     line_color=None,
     xrange=None,
     sample_kwargs={},
+    family="normal",
     **kwargs,
 ):
     """Make a custom linear model plot with confidence bands.
@@ -60,7 +61,7 @@ def lm(
     # Run GLM in PyMC3
     df = pd.DataFrame(dict(x=x, y=y))
     with pm.Model() as glm:
-        pm.GLM.from_formula("y ~ x", data=df)
+        pm.GLM.from_formula("y ~ x", data=df, family=family)
         idata_glm = pm.sample(return_inferencedata=True, **sample_kwargs)
 
     summary_glm = az.summary(idata_glm, hdi_prob=hdi_prob)

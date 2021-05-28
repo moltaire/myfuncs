@@ -75,7 +75,7 @@ def factorial_heatmap(
     values = df_sorted[value_var].values.reshape(n_row, n_col)
 
     # Make the heatmap
-    im = plt.imshow(values, cmap=cmap, norm=norm)
+    im = ax.imshow(values, cmap=cmap, norm=norm)
 
     # Optionally print values
     if print_values:
