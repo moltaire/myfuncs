@@ -50,7 +50,7 @@ def two_sample_ttestbf(y1, y2, paired=False):
 
     # Run the test and compute the Bayes factor
     if paired:
-        r("bf = ttestBF(x=df$y1, y=df$y2), paired=TRUE")
+        r("bf = ttestBF(x=df$y1, y=df$y2, paired=TRUE)")
     else:
         r("bf = ttestBF(x=df$y1, y=df$y2)")
     # Extract result
