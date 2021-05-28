@@ -116,8 +116,12 @@ def label_axes(fig, labels=None, loc=None, **kwargs):
     labels = cycle(labels)
     if loc is None:
         loc = (-0.3, 1)
-    for ax, lab in zip(fig.axes, labels):
-        ax.annotate(lab, xy=loc, xycoords="axes fraction", **kwargs)
+    for i, (ax, lab) in enumerate(zip(fig.axes, labels)):
+        if isinstance(loc[0], float):
+            loc_i = loc
+        else:
+            loc_i = loc[i]
+        ax.annotate(lab, xy=loc_i, xycoords="axes fraction", **kwargs)
 
 
 def break_after_nth_tick(ax, n, axis="x", occHeight=None, occWidth=None, where=0.5):
